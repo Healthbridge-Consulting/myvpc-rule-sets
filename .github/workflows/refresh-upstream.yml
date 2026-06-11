@@ -1,0 +1,41 @@
+name: refresh upstream
+
+# Daily auto-refresh of the upstream/ mirror.
+# - Runs update-upstream.sh
+# - If anything changed (binary diff on .srs files), commits and pushes
+# - If nothing changed, exits 0 silently (no empty commits, no noise)
+# - Can also be triggered manually from the Actions tab.
+
+on:
+  schedule:
+    # 04:00 UTC daily = 12:00 China time = 21:00 SJ time. Picked to be
+    # well after MetaCubeX's typical daily rebuild window so we catch
+    # the freshest content.
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch upstream rule sets
+        run: bash ./update-upstream.sh
+
+      - name: Commit and push if changed
+        run: |
+          if [[ -z "$(git status --porcelain upstream/)" ]]; then
+            echo "no upstream changes; nothing to commit"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add upstream/
+          git commit -m "refresh upstream rule sets ($(date -u +%Y-%m-%d))"
+          git push

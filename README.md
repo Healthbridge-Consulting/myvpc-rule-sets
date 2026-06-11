@@ -1,0 +1,71 @@
+# myvpc rule-sets
+
+Source of truth for sing-box `remote` rule_sets used by the myvpc topology.
+Two parallel lists drive the routing inversion (default Tokyo-direct egress,
+exceptions go via SJ; clients have their own bypass-direct list):
+
+| File | Consumed by | Role |
+|---|---|---|
+| `upstream/category-ai-!cn.srs` | Tokyo | AI services (OpenAI / Anthropic / Google AI / …) → must egress US (SJ). |
+| `upstream/paypal.srs` | Tokyo | PayPal → SJ. |
+| `upstream/stripe.srs` | Tokyo | Stripe → SJ. |
+| `us-required-extras.json` | Tokyo | Hand-curated US banks / brokerages / gov → SJ. |
+| `upstream/{jsdelivr,cloudflare,akamai,jquery,gitbook}.srs` | Windows + GL-MT3000 | CDN / static — direct via China ISP. |
+| `upstream/{github,gitlab,gitee,jetbrains,npmjs,python,ubuntu,docker,stackexchange,jfrog,archive}.srs` | Windows + GL-MT3000 | Developer tooling — direct. |
+| `upstream/{mozilla,wikimedia,atlassian,freecodecamp}.srs` | Windows + GL-MT3000 | Documentation — direct. |
+| `client-bypass.json` | Windows + GL-MT3000 | Hand-curated extras (`merriam-webster.com`, etc.) — direct. |
+
+All upstream files are mirrored from `MetaCubeX/meta-rules-dat` (sing branch) by `update-upstream.sh`.
+
+## How clients see them
+
+Once this repo is pushed to a public GitHub repo (e.g. `https://github.com/<user>/myvpc-rule-sets`), every sing-box config (Tokyo, Windows, each GL-MT3000) declares them as `type: remote, update_interval: 24h` and fetches the raw URLs:
+
+```
+https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/upstream/category-ai-!cn.srs   (binary)
+https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/upstream/paypal.srs            (binary)
+https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/upstream/stripe.srs            (binary)
+https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/us-required-extras.json        (source)
+https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/client-bypass.json             (source)
+```
+
+`format: "binary"` for the upstream `.srs` files; `format: "source"` for the local `.json` files. Clients fetch via the VPN tunnel (`download_detour: "auto"` on clients, `"direct"` on Tokyo).
+
+## Workflows
+
+### Add a US-only site I just discovered (e.g. a new bank)
+
+Edit `us-required-extras.json`, add the domain to the `domain_suffix` array, commit, push to GitHub. All clients pick it up within 24 h.
+
+### Add a China-accessible foreign site to bypass the VPN
+
+Edit `client-bypass.json`, add the domain, commit, push.
+
+### Refresh upstream mirrors
+
+**Automated**: a GitHub Action (`.github/workflows/refresh-upstream.yml`) runs `update-upstream.sh` daily at 04:00 UTC, commits + pushes if `upstream/` differs, otherwise exits silently. Clients see upstream changes within ~24 h via the sing-box `update_interval`. No manual action needed in steady state.
+
+**Manual refresh** (e.g., right after adding a new entry to the `FILES` array):
+
+```sh
+./update-upstream.sh
+git add upstream/ && git commit -m "refresh upstream rule sets"
+git push
+```
+
+Or trigger the workflow from the GitHub Actions tab via "Run workflow".
+
+### Add a new upstream `.srs` to mirror
+
+Edit the `FILES` array in `update-upstream.sh`, commit, push. The daily workflow will pick up the new entry on its next run and populate it. Then update the sing-box configs that should consume it.
+
+## Format rules
+
+- Both local `.json` files use sing-box headless rule set source format v1.
+- `domain_suffix` matches the bare domain AND all subdomains (so `chase.com` covers `chase.com`, `www.chase.com`, `secure.chase.com`, etc.).
+- Sort entries by category, separated by blank lines, for review ease (sing-box doesn't care about order or whitespace).
+
+## What's NOT here
+
+- **No Tokyo / client sing-box config snippets** — those live in `build/tokyo-debian12/sing-box/`, `build/windows/`, `build/glmt3000/`. The rule sets are *referenced* from there.
+- **No secrets** — all content here is public. Safe to commit to a public GitHub repo.

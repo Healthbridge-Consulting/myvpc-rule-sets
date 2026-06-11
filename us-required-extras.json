@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "domain_suffix": [
+        "chase.com",
+        "bankofamerica.com",
+        "wellsfargo.com",
+        "citi.com",
+        "citibank.com",
+        "capitalone.com",
+        "usbank.com",
+        "pnc.com",
+
+        "schwab.com",
+        "fidelity.com",
+        "vanguard.com",
+        "etrade.com",
+        "robinhood.com",
+        "tdameritrade.com",
+        "merrilledge.com",
+        "morganstanley.com",
+
+        "americanexpress.com",
+        "discover.com",
+        "venmo.com",
+        "zelle.com",
+        "cash.app",
+
+        "irs.gov",
+        "ssa.gov",
+        "login.gov",
+        "id.me",
+        "usa.gov",
+        "healthcare.gov"
+      ]
+    }
+  ]
+}
