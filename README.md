@@ -1,6 +1,6 @@
 # myvpc rule-sets
 
-Source of truth for sing-box `remote` rule_sets used by the myvpc topology.
+Source of truth for sing-box `remote` rule_sets used by the vpn topology.
 Two parallel lists drive the routing inversion (default Tokyo-direct egress,
 exceptions go via SJ; clients have their own bypass-direct list):
 
@@ -10,16 +10,16 @@ exceptions go via SJ; clients have their own bypass-direct list):
 | `upstream/paypal.srs` | Tokyo | PayPal → SJ. |
 | `upstream/stripe.srs` | Tokyo | Stripe → SJ. |
 | `us-required-extras.json` | Tokyo | Hand-curated US banks / brokerages / gov → SJ. |
-| `upstream/{jsdelivr,cloudflare,akamai,jquery,gitbook}.srs` | Windows + GL-MT3000 | CDN / static — direct via China ISP. |
-| `upstream/{github,gitlab,gitee,jetbrains,npmjs,python,ubuntu,docker,stackexchange,jfrog,archive}.srs` | Windows + GL-MT3000 | Developer tooling — direct. |
-| `upstream/{mozilla,wikimedia,atlassian,freecodecamp}.srs` | Windows + GL-MT3000 | Documentation — direct. |
-| `client-bypass.json` | Windows + GL-MT3000 | Hand-curated extras (`merriam-webster.com`, etc.) — direct. |
+| `upstream/{jsdelivr,cloudflare,akamai,jquery,gitbook}.srs` | vpn client devices | CDN / static — direct via China ISP. |
+| `upstream/{github,gitlab,gitee,jetbrains,npmjs,python,ubuntu,docker,stackexchange,jfrog,archive}.srs` | vpn client devices | Developer tooling — direct. |
+| `upstream/{mozilla,wikimedia,atlassian,freecodecamp}.srs` | vpn client devices | Documentation — direct. |
+| `client-bypass.json` | vpn client devices | Hand-curated extras (`merriam-webster.com`, etc.) — direct. |
 
 All upstream files are mirrored from `MetaCubeX/meta-rules-dat` (sing branch) by `update-upstream.sh`.
 
 ## How clients see them
 
-Once this repo is pushed to a public GitHub repo (e.g. `https://github.com/<user>/myvpc-rule-sets`), every sing-box config (Tokyo, Windows, each GL-MT3000) declares them as `type: remote, update_interval: 24h` and fetches the raw URLs:
+Once this repo is pushed to a public GitHub repo (e.g. `https://github.com/<user>/myvpc-rule-sets`), every sing-box config (Tokyo, each vpn client device) declares them as `type: remote, update_interval: 24h` and fetches the raw URLs:
 
 ```
 https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/upstream/category-ai-!cn.srs   (binary)
@@ -79,8 +79,3 @@ Edit the `FILES` array in `update-upstream.sh`, commit, push. The daily workflow
 - Both local `.json` files use sing-box headless rule set source format v1.
 - `domain_suffix` matches the bare domain AND all subdomains (so `chase.com` covers `chase.com`, `www.chase.com`, `secure.chase.com`, etc.).
 - Sort entries by category, separated by blank lines, for review ease (sing-box doesn't care about order or whitespace).
-
-## What's NOT here
-
-- **No Tokyo / client sing-box config snippets** — those live in `build/tokyo-debian12/sing-box/`, `build/windows/`, `build/glmt3000/`. The rule sets are *referenced* from there.
-- **No secrets** — all content here is public. Safe to commit to a public GitHub repo.
