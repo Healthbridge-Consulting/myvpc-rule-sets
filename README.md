@@ -55,9 +55,24 @@ git push
 
 Or trigger the workflow from the GitHub Actions tab via "Run workflow".
 
-### Add a new upstream `.srs` to mirror
+### Add a new upstream `.srs` to mirror (end-to-end, automated)
 
-Edit the `FILES` array in `update-upstream.sh`, commit, push. The daily workflow will pick up the new entry on its next run and populate it. Then update the sing-box configs that should consume it.
+Two helper scripts in `scripts/` do all the wiring (FILES edit + fetch + config update). Pick by role:
+
+```sh
+# Tokyo us-required (route via SJ): edits FILES, fetches, updates Tokyo live config
+./scripts/add-tokyo-us-required.sh <service-name>     # e.g. square
+
+# Client bypass (route direct via China ISP): edits FILES + both templates;
+# user runs the existing apply scripts to push to each device afterward
+./scripts/add-client-bypass.sh <service-name>          # e.g. notion
+```
+
+Both verify the file exists at MetaCubeX before changing anything, are idempotent on re-run, and don't auto-commit (review the diff and `git push` yourself).
+
+### Manually adding a new upstream `.srs` (if the scripts don't fit)
+
+Edit the `FILES` array in `update-upstream.sh`, commit, push. The daily workflow picks up the new entry on its next run. Then update each consuming sing-box config to actually reference it.
 
 ## Format rules
 
