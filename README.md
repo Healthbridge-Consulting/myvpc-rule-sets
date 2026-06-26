@@ -14,6 +14,7 @@ exceptions go via SJ; clients have their own bypass-direct list):
 | `upstream/{github,gitlab,gitee,jetbrains,npmjs,python,ubuntu,docker,stackexchange,jfrog,archive}.srs` | vpn client devices | Developer tooling — direct. |
 | `upstream/{mozilla,wikimedia,atlassian,freecodecamp}.srs` | vpn client devices | Documentation — direct. |
 | `client-bypass.json` | vpn client devices | Hand-curated extras (`merriam-webster.com`, etc.) — direct. |
+| `client-force-tunnel.json` | vpn client devices | Hand-curated **override** — domains that MUST go via the tunnel even when `geosite-cn` would send them China-direct (e.g. Android connectivity-check domains). Evaluated **before** the `geosite-cn` DNS + route rules. |
 
 All upstream files are mirrored from `MetaCubeX/meta-rules-dat` (sing branch) by `update-upstream.sh`.
 
@@ -27,6 +28,7 @@ https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/upstream/paypal.sr
 https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/upstream/stripe.srs            (binary)
 https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/us-required-extras.json        (source)
 https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/client-bypass.json             (source)
+https://raw.githubusercontent.com/<user>/myvpc-rule-sets/main/client-force-tunnel.json      (source)
 ```
 
 `format: "binary"` for the upstream `.srs` files; `format: "source"` for the local `.json` files. Clients fetch via the VPN tunnel (`download_detour: "auto"` on clients, `"direct"` on Tokyo).
@@ -40,6 +42,12 @@ Edit `us-required-extras.json`, add the domain to the `domain_suffix` array, com
 ### Add a China-accessible foreign site to bypass the VPN
 
 Edit `client-bypass.json`, add the domain, commit, push.
+
+### Force a domain through the tunnel (override a wrong China-direct match)
+
+Symptom: a foreign service is mis-classified by `geosite-cn` (or DNS-poisoned) so it gets sent China-direct and breaks. Classic case: an **Android phone behind a GL-MT3000 shows "Connected / Limited"** because its Google `generate_204` connectivity-check domains (`connectivitycheck.gstatic.com`, etc.) match `geosite-cn` → routed direct → GFW poisons the DNS and resets the probe → Android never gets its `204`.
+
+Fix: edit `client-force-tunnel.json`, add the domain to the `domain_suffix` array, commit, push. Client devices declare it as the `force-tunnel` remote rule_set and evaluate it **before** `geosite-cn` in both the DNS rules (→ `dns-remote`, clean foreign DNS) and the route rules (→ `auto`, the tunnel). All clients pick it up within 24 h. No per-device config change needed once the `force-tunnel` rule_set is wired into a client config (see `build/{glmt3000,windows}/config.json.template`).
 
 ### Refresh upstream mirrors
 

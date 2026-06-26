@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "domain_suffix": [
+        "connectivitycheck.gstatic.com",
+        "connectivitycheck.android.com",
+        "clients3.google.com",
+        "clients4.google.com",
+        "play.googleapis.com",
+        "www.google.com"
+      ]
+    }
+  ]
+}
