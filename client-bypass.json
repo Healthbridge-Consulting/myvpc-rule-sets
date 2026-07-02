@@ -5,6 +5,19 @@
       "domain_suffix": [
         "merriam-webster.com"
       ]
+    },
+    {
+      "domain_suffix": [
+        "meeting.qq.com",
+        "wemeet.qq.com",
+        "meeting.tencent.com",
+        "tim.qq.com",
+        "my-imcloud.com",
+        "rtc-web.com",
+        "rtc-web.io",
+        "voovmeeting.com",
+        "voov.com"
+      ]
     }
   ]
 }
