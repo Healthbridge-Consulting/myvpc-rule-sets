@@ -10,6 +10,28 @@
         "play.googleapis.com",
         "www.google.com"
       ]
+    },
+    {
+      "domain_suffix": [
+        "github.com",
+        "github.io",
+        "githubusercontent.com",
+        "githubassets.com",
+        "ghcr.io",
+        "github.dev",
+        "wikipedia.org",
+        "wikimedia.org",
+        "wikidata.org",
+        "wiktionary.org",
+        "wikibooks.org",
+        "wikinews.org",
+        "wikiquote.org",
+        "wikisource.org",
+        "wikiversity.org",
+        "wikivoyage.org",
+        "mediawiki.org",
+        "wikimediafoundation.org"
+      ]
     }
   ]
 }
