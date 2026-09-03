@@ -3,12 +3,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "merriam-webster.com"
-      ]
-    },
-    {
-      "domain_suffix": [
-        "app.fastmail.com"
+        "merriam-webster.com",
+        "app.fastmail.com",
+        "microsoft.com"
       ]
     },
     {
