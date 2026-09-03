@@ -8,6 +8,11 @@
     },
     {
       "domain_suffix": [
+        "app.fastmail.com"
+      ]
+    },
+    {
+      "domain_suffix": [
         "meeting.qq.com",
         "wemeet.qq.com",
         "meeting.tencent.com",
