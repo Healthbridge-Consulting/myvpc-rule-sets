@@ -13,6 +13,11 @@
     },
     {
       "domain_suffix": [
+        "ntfy.sh"
+      ]
+    },
+    {
+      "domain_suffix": [
         "github.com",
         "github.io",
         "githubusercontent.com",
