@@ -18,6 +18,13 @@
     },
     {
       "domain_suffix": [
+        "godaddy.com",
+        "secureserver.net",
+        "wsimg.com"
+      ]
+    },
+    {
+      "domain_suffix": [
         "github.com",
         "github.io",
         "githubusercontent.com",
